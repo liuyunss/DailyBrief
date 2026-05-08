@@ -1,14 +1,16 @@
 """Reddit 适配器"""
 
+import logging
 import requests
 from adapters.base import BaseAdapter
+
+logger = logging.getLogger(__name__)
 
 
 class RedditAdapter(BaseAdapter):
     """Reddit 适配器"""
     
     def fetch(self, config):
-        items = []
         subreddit = config.get("subreddit", "programming")
         sort = config.get("sort", "hot")
         limit = config.get("limit", 20)
@@ -23,6 +25,7 @@ class RedditAdapter(BaseAdapter):
             resp.raise_for_status()
             data = resp.json()
             
+            items = []
             for post in data.get("data", {}).get("children", []):
                 post_data = post.get("data", {})
                 ups = post_data.get("ups", 0)
@@ -35,7 +38,8 @@ class RedditAdapter(BaseAdapter):
                         "score": ups,
                         "description": post_data.get("selftext", "")[:200],
                     })
+            
+            return self.standardize_all(items)
         except Exception as e:
-            print(f"Reddit 抓取失败: {e}")
-        
-        return items
+            logger.error(f"Reddit 抓取失败: {e}")
+            return []

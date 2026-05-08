@@ -1,0 +1,26 @@
+# DailyBrief 全局配置
+
+# 过滤规则
+filter:
+  # 去重：标题相似度 > 阈值视为重复
+  dedup_threshold: 0.7
+  
+  # 排除关键词
+  exclude_keywords:
+    - 招聘
+    - 求助
+    - 广告
+
+# 输出配置
+output:
+  format: markdown
+  max_items: 20
+  categories:
+    - name: 代码与项目
+      keywords: [github, repo, 开源, 代码]
+    - name: 技术文章
+      keywords: [blog, 文章, 教程, 深度]
+    - name: AI 与机器学习
+      keywords: [ai, ml, gpt, llm, 模型]
+    - name: 其他
+      keywords: []

@@ -1,0 +1,8 @@
+name: GitHub Trending
+type: github
+enabled: true
+priority: 1
+config:
+  language: all
+  since: daily
+  limit: 20

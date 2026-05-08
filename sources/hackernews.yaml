@@ -1,0 +1,7 @@
+name: Hacker News
+type: hackernews
+enabled: true
+priority: 3
+config:
+  min_score: 100
+  top_n: 20

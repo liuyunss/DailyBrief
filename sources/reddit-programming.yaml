@@ -1,0 +1,9 @@
+name: Reddit r/programming
+type: reddit
+enabled: true
+priority: 4
+config:
+  subreddit: programming
+  sort: hot
+  limit: 20
+  min_upvotes: 100

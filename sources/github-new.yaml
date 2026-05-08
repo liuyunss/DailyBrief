@@ -1,0 +1,8 @@
+name: GitHub New Repos
+type: github_new
+enabled: true
+priority: 2
+config:
+  language: all
+  stars_min: 50
+  since: daily

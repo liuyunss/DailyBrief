@@ -1,0 +1,9 @@
+name: Reddit r/MachineLearning
+type: reddit
+enabled: true
+priority: 5
+config:
+  subreddit: MachineLearning
+  sort: hot
+  limit: 20
+  min_upvotes: 50
