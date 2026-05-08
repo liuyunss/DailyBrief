@@ -1,6 +1,33 @@
+# Dev.to 热门文章源
+# 使用 Dev.to API
+
 name: Dev.to
-type: devto
+type: api
 enabled: true
-priority: 11
-config:
-  limit: 20
+
+url: "https://dev.to/api/articles"
+method: GET
+
+# 请求参数
+params:
+  per_page: 20
+  top: 1  # 最近 1 天
+
+# JSON 路径（顶层就是数组）
+path: ""
+
+# 字段映射
+fields:
+  title: "title"
+  url: "url"
+  description: "description"
+  score: "positive_reactions_count"
+
+# 热度标签
+metric_label: "reactions"
+
+# 每源条数
+limit: 10
+
+# 去重天数
+dedup_days: 3

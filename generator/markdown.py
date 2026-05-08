@@ -1,22 +1,43 @@
 """Markdown 报告生成器"""
 
+from datetime import datetime
+from lunardate import LunarDate
+import re
 
-def generate_markdown(items, date, config):
+
+def generate_markdown(items, date_str, config):
     """
     生成 Markdown 格式的报告
     
     Args:
         items: 条目列表
-        date: 日期
+        date_str: 日期字符串 YYYY-MM-DD
         config: 输出配置
         
     Returns:
         str: Markdown 内容
     """
-    max_items = config.get("max_items", 20)
-    categories = config.get("categories", [])
+    # 解析日期
+    dt = datetime.strptime(date_str, "%Y-%m-%d")
+    
+    # 星期
+    weekdays = ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"]
+    weekday = weekdays[dt.weekday()]
+    
+    # ISO 周数
+    week_num = dt.isocalendar()[1]
+    
+    # 阴历
+    lunar = LunarDate.fromSolarDate(dt.year, dt.month, dt.day)
+    lunar_months = ["正月", "二月", "三月", "四月", "五月", "六月",
+                    "七月", "八月", "九月", "十月", "冬月", "腊月"]
+    lunar_days = ["初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九", "初十",
+                  "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十",
+                  "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十"]
+    lunar_str = f"农历{lunar_months[lunar.month - 1]}{lunar_days[lunar.day - 1]}"
     
     # 按分类分组
+    categories = config.get("categories", [])
     categorized = {cat["name"]: [] for cat in categories}
     categorized["其他"] = []
     
@@ -33,9 +54,9 @@ def generate_markdown(items, date, config):
     
     # 生成 Markdown
     lines = [
-        f"# DailyBrief - {date}",
+        f"# DailyBrief - {date_str}",
         "",
-        f"> 自动更新于 {date}，共收录 {len(items)} 条内容",
+        f"> {lunar_str} {weekday} 第{week_num}周",
         "",
     ]
     
@@ -50,11 +71,20 @@ def generate_markdown(items, date, config):
             title = item["title"]
             url = item["url"]
             source = item["source"]
-            score = item.get("score", 0)
+            score = item.get("score")
+            metric_label = item.get("metric_label", "")
+            description = item.get("description", "")
             
-            # 格式：标题（链接）| 来源 | 分数
-            score_str = f" ⭐{score}" if score else ""
+            # 格式：标题（链接）
+            score_str = f" · {metric_label} {_format_number(score)}" if score and metric_label else ""
             lines.append(f"- [{title}]({url}) `{source}`{score_str}")
+            
+            # 简介（如果有且非空）
+            if description:
+                desc = _clean_html(description)
+                if len(desc) > 50:
+                    desc = desc[:50] + "..."
+                lines.append(f"  {desc}")
         
         lines.append("")
     
@@ -68,15 +98,44 @@ def generate_markdown(items, date, config):
     return "\n".join(lines)
 
 
+def _format_number(num):
+    """数字格式化：亿 > 万 > 千 > 百"""
+    if num is None:
+        return ""
+    
+    try:
+        num = int(num)
+    except (ValueError, TypeError):
+        return str(num)
+    
+    if num >= 100_000_000:
+        return f"{num / 100_000_000:.1f}亿"
+    elif num >= 10_000:
+        return f"{num / 10_000:.1f}万"
+    elif num >= 1_000:
+        return f"{num / 1_000:.1f}千"
+    elif num >= 100:
+        return f"{num}"
+    else:
+        return str(num)
+
+
+def _clean_html(text):
+    """清理 HTML 标签"""
+    if not text:
+        return ""
+    clean = re.sub(r'<[^>]+>', '', text)
+    clean = re.sub(r'\s+', ' ', clean).strip()
+    return clean
+
+
 def _matches_category(item, keywords):
     """检查条目是否匹配分类"""
     if not keywords:
         return False
     
-    title = item.get("title", "") or ""
-    description = item.get("description", "") or ""
-    title = title.lower()
-    description = description.lower()
+    title = (item.get("title", "") or "").lower()
+    description = (item.get("description", "") or "").lower()
     
     for keyword in keywords:
         if keyword.lower() in title or keyword.lower() in description:

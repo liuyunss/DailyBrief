@@ -1,6 +1,33 @@
+# 知乎热榜源
+# 注意：需要登录 Cookie 才能访问，暂不可用
+
 name: 知乎热榜
-type: zhihu
-enabled: true
-priority: 8
-config:
-  limit: 20
+type: api
+enabled: false  # 需要登录，暂不可用
+
+url: "https://www.zhihu.com/api/v3/feed/topstory/hot-lists/total"
+method: GET
+
+# 请求头
+headers:
+  User-Agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+  Referer: "https://www.zhihu.com/hot"
+
+# JSON 路径
+path: "data"
+
+# 字段映射
+fields:
+  title: "target.title"
+  url: "target.url"
+  description: "target.excerpt"
+  score: "detail_text"
+
+# 热度标签
+metric_label: "热度"
+
+# 每源条数
+limit: 10
+
+# 去重天数
+dedup_days: 3

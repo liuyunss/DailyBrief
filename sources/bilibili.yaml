@@ -1,6 +1,12 @@
+# B站热门视频源
+# 需要特殊适配器（特殊请求头）
+
 name: B站热门
 type: bilibili
 enabled: true
-priority: 9
-config:
-  limit: 20
+
+# 每源条数
+limit: 10
+
+# 去重天数（B站内容留存久）
+dedup_days: 7

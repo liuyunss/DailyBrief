@@ -1,6 +1,44 @@
+# 掘金推荐源
+# 使用掘金 API 获取推荐文章
+
 name: 掘金
-type: juejin
+type: api
 enabled: true
-priority: 10
-config:
+
+url: "https://api.juejin.cn/recommend_api/v1/article/recommend_all_feed"
+method: POST
+
+# 请求参数
+params:
+  id_type: 2
+  sort_type: 200
+  cursor: "0"
   limit: 20
+
+# 请求头
+headers:
+  User-Agent: "DailyBrief/1.0"
+  Content-Type: "application/json"
+
+# JSON 路径
+path: "data"
+
+# 字段映射
+fields:
+  title: "article_info.title"
+  url: "article_info.article_id"
+  description: "article_info.brief_content"
+  score: "counts.digg_count"
+
+# URL 构造：掘金需要拼接文章 ID
+url_prefix: "https://juejin.cn/post/"
+url_suffix: ""
+
+# 热度标签
+metric_label: "点赞"
+
+# 每源条数
+limit: 10
+
+# 去重天数
+dedup_days: 5

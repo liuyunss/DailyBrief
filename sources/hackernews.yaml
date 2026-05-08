@@ -1,7 +1,28 @@
+# Hacker News 源
+# 使用 Firebase API 获取热门文章
+
 name: Hacker News
-type: hackernews
+type: api
 enabled: true
-priority: 3
-config:
-  min_score: 100
-  top_n: 20
+
+url: "https://hacker-news.firebaseio.com/v0/topstories.json"
+method: GET
+
+# JSON 路径（顶层就是数组）
+path: ""
+
+# 字段映射（HN 返回的是 ID 列表，需要二次请求）
+# 注意：这个源需要特殊处理，使用自定义适配器
+fields:
+  title: "title"
+  url: "url"
+  score: "score"
+
+# 热度标签
+metric_label: "points"
+
+# 每源条数
+limit: 10
+
+# 去重天数
+dedup_days: 3

@@ -1,6 +1,32 @@
+# V2EX 热门源
+# 使用 V2EX API 获取热门话题
+
 name: V2EX 热门
-type: v2ex
+type: api
 enabled: true
-priority: 6
-config:
-  limit: 15
+
+url: "https://www.v2ex.com/api/topics/hot.json"
+method: GET
+
+# 请求头
+headers:
+  User-Agent: "DailyBrief/1.0"
+
+# JSON 路径（顶层就是数组）
+path: ""
+
+# 字段映射
+fields:
+  title: "title"
+  url: "url"
+  description: "content"
+  score: "replies"
+
+# 热度标签
+metric_label: "回复"
+
+# 每源条数
+limit: 10
+
+# 去重天数
+dedup_days: 3

@@ -1,7 +1,23 @@
+# 少数派 RSS 源
+
 name: 少数派
 type: rss
 enabled: true
-priority: 7
-config:
-  url: https://sspai.com/feed
-  max_items: 10
+
+# RSS 地址
+url: "https://sspai.com/feed"
+
+# 字段映射
+fields:
+  title: "title"
+  url: "link"
+  description: "summary"
+
+# 热度标签（少数派没有分数，不显示）
+metric_label: ""
+
+# 每源条数
+limit: 10
+
+# 去重天数
+dedup_days: 5

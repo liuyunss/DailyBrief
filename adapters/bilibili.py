@@ -1,4 +1,4 @@
-"""B站热门适配器"""
+"""B站热门适配器 - 特殊请求头"""
 
 import logging
 import requests
@@ -11,7 +11,7 @@ class BilibiliAdapter(BaseAdapter):
     """B站热门视频适配器"""
     
     def fetch(self, config):
-        limit = config.get("limit", 20)
+        limit = config.get("limit", 10)
         
         # B站热门视频 API（无需认证）
         url = "https://api.bilibili.com/x/web-interface/popular"
@@ -34,10 +34,12 @@ class BilibiliAdapter(BaseAdapter):
                     "url": f"https://www.bilibili.com/video/{item.get('bvid', '')}",
                     "source": "B站热门",
                     "score": stat.get("view", 0),
-                    "description": item.get("desc", "")[:100],
+                    "description": "",
+                    "metric_label": "播放",
                 })
             
-            return self.standardize_all(items)
+            return items
+            
         except Exception as e:
-            logger.error(f"B站热门抓取失败: {e}")
+            logger.error(f"B站请求失败: {e}")
             return []

@@ -1,7 +1,15 @@
+# ArXiv ML 源
+# 需要特殊适配器（XML 解析）
+
 name: ArXiv ML
 type: arxiv
 enabled: true
-priority: 12
-config:
-  category: cs.AI
-  limit: 10
+
+# ArXiv 分类
+category: "cs.AI"
+
+# 每源条数
+limit: 10
+
+# 去重天数
+dedup_days: 7

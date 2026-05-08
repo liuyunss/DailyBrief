@@ -1,8 +1,39 @@
+# GitHub Trending 源
+# 使用 GitHub Search API 获取热门仓库
+
 name: GitHub Trending
-type: github
+type: api
 enabled: true
-priority: 1
-config:
-  language: all
-  since: daily
-  limit: 20
+
+url: "https://api.github.com/search/repositories"
+method: GET
+
+# 请求参数
+params:
+  q: "stars:>100 pushed:>{today}"
+  sort: "stars"
+  order: "desc"
+  per_page: 20
+
+# 需要设置 GitHub Token 以避免限流（可选）
+# headers:
+#   Authorization: "token ghp_xxxx"
+
+# JSON 路径
+path: "items"
+
+# 字段映射
+fields:
+  title: "full_name"
+  url: "html_url"
+  description: "description"
+  score: "stargazers_count"
+
+# 热度标签
+metric_label: "⭐"
+
+# 每源条数
+limit: 10
+
+# 去重天数
+dedup_days: 5

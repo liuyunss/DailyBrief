@@ -1,9 +1,36 @@
+# Reddit r/programming 源
+# 使用 Reddit JSON API
+
 name: Reddit r/programming
-type: reddit
+type: api
 enabled: true
-priority: 4
-config:
-  subreddit: programming
-  sort: hot
+
+url: "https://www.reddit.com/r/programming/hot.json"
+method: GET
+
+# 请求参数
+params:
   limit: 20
-  min_upvotes: 100
+
+# 请求头（Reddit 要求 User-Agent）
+headers:
+  User-Agent: "DailyBrief/1.0"
+
+# JSON 路径
+path: "data.children"
+
+# 字段映射
+fields:
+  title: "data.title"
+  url: "data.url"
+  description: "data.selftext"
+  score: "data.score"
+
+# 热度标签
+metric_label: "upvotes"
+
+# 每源条数
+limit: 10
+
+# 去重天数
+dedup_days: 3

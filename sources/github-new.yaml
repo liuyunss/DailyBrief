@@ -1,8 +1,35 @@
+# GitHub New Repos 源
+# 使用 GitHub Search API 获取新创建的仓库
+
 name: GitHub New Repos
-type: github_new
+type: api
 enabled: true
-priority: 2
-config:
-  language: all
-  stars_min: 50
-  since: daily
+
+url: "https://api.github.com/search/repositories"
+method: GET
+
+# 请求参数
+params:
+  q: "stars:>50 created:>{today}"
+  sort: "stars"
+  order: "desc"
+  per_page: 20
+
+# JSON 路径
+path: "items"
+
+# 字段映射
+fields:
+  title: "full_name"
+  url: "html_url"
+  description: "description"
+  score: "stargazers_count"
+
+# 热度标签
+metric_label: "⭐"
+
+# 每源条数
+limit: 10
+
+# 去重天数
+dedup_days: 5
