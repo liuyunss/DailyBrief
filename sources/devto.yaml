@@ -1,0 +1,6 @@
+name: Dev.to
+type: devto
+enabled: true
+priority: 11
+config:
+  limit: 20

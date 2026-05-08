@@ -1,0 +1,6 @@
+name: V2EX 热门
+type: v2ex
+enabled: true
+priority: 6
+config:
+  limit: 15

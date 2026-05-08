@@ -1,0 +1,6 @@
+name: B站热门
+type: bilibili
+enabled: true
+priority: 9
+config:
+  limit: 20

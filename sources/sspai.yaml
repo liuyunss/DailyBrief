@@ -1,0 +1,7 @@
+name: 少数派
+type: rss
+enabled: true
+priority: 7
+config:
+  url: https://sspai.com/feed
+  max_items: 10

@@ -1,0 +1,7 @@
+name: ArXiv ML
+type: arxiv
+enabled: true
+priority: 12
+config:
+  category: cs.AI
+  limit: 10

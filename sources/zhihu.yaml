@@ -1,0 +1,6 @@
+name: 知乎热榜
+type: zhihu
+enabled: true
+priority: 8
+config:
+  limit: 20
