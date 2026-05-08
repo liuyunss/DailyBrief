@@ -1,5 +1,9 @@
 # DailyBrief 全局配置
 
+# 全局去重天数（默认 3 天）
+# 每个源可以在自己的配置文件中覆盖
+dedup_days: 3
+
 # 过滤规则
 filter:
   # 去重：标题相似度 > 阈值视为重复
@@ -14,13 +18,12 @@ filter:
 # 输出配置
 output:
   format: markdown
-  max_items: 20
   categories:
     - name: 代码与项目
-      keywords: [github, repo, 开源, 代码]
+      keywords: [github, repo, 开源, 代码, project]
     - name: 技术文章
-      keywords: [blog, 文章, 教程, 深度]
+      keywords: [blog, 文章, 教程, 深度, tutorial, guide]
     - name: AI 与机器学习
-      keywords: [ai, ml, gpt, llm, 模型]
+      keywords: [ai, ml, gpt, llm, 模型, machine learning, deep learning]
     - name: 其他
       keywords: []

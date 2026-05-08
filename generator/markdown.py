@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from lunardate import LunarDate
-import re
+from utils import clean_html
 
 
 def generate_markdown(items, date_str, config):
@@ -81,7 +81,7 @@ def generate_markdown(items, date_str, config):
             
             # 简介（如果有且非空）
             if description:
-                desc = _clean_html(description)
+                desc = clean_html(description)
                 if len(desc) > 50:
                     desc = desc[:50] + "..."
                 lines.append(f"  {desc}")
@@ -118,15 +118,6 @@ def _format_number(num):
         return f"{num}"
     else:
         return str(num)
-
-
-def _clean_html(text):
-    """清理 HTML 标签"""
-    if not text:
-        return ""
-    clean = re.sub(r'<[^>]+>', '', text)
-    clean = re.sub(r'\s+', ' ', clean).strip()
-    return clean
 
 
 def _matches_category(item, keywords):

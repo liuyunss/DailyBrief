@@ -60,30 +60,3 @@ def save_urls(date, urls):
         logger.info(f"缓存已保存: {cache_file}, {len(urls)} 条")
     except Exception as e:
         logger.error(f"保存缓存失败: {e}")
-
-
-def filter_new_items(items, recent_urls):
-    """
-    过滤掉已存在的 URL
-    
-    Args:
-        items: 条目列表
-        recent_urls: 近期已抓取的 URL 集合
-        
-    Returns:
-        list: 新条目列表
-    """
-    new_items = []
-    skipped = 0
-    
-    for item in items:
-        url = item.get("url", "")
-        if url and url in recent_urls:
-            skipped += 1
-        else:
-            new_items.append(item)
-    
-    if skipped > 0:
-        logger.info(f"跨天去重: 跳过 {skipped} 条已存在的内容")
-    
-    return new_items

@@ -1,13 +1,11 @@
 """DailyBrief - 每日技术精选"""
 
 import os
-import sys
 import yaml
 import logging
 from datetime import datetime
 from pathlib import Path
 
-from adapters.base import BaseAdapter
 from adapters.api import GenericAPIAdapter
 from adapters.rss import RSSAdapter
 from adapters.bilibili import BilibiliAdapter
@@ -16,6 +14,7 @@ from adapters.arxiv import ArxivAdapter
 from cache_manager import load_recent_urls, save_urls
 from filters.dedup import deduplicate
 from generator.markdown import generate_markdown
+from utils import group_by_source, find_source_config
 
 # 日志配置
 logging.basicConfig(
@@ -36,8 +35,6 @@ ADAPTERS = {
     "hackernews": HackerNewsAdapter,
     "arxiv": ArxivAdapter,
 }
-
-VALID_TYPES = list(ADAPTERS.keys())
 
 
 def load_sources(sources_dir="sources"):
@@ -65,16 +62,15 @@ def load_sources(sources_dir="sources"):
             
             # 检查类型
             source_type = config.get("type")
-            if source_type not in VALID_TYPES:
-                logger.error(f"无效类型 '{source_type}'，文件: {yaml_file.name}，有效值: {VALID_TYPES}")
-                sys.exit(1)
+            if source_type not in ADAPTERS:
+                logger.error(f"无效类型 '{source_type}'，文件: {yaml_file.name}，有效值: {list(ADAPTERS.keys())}")
+                continue
             
             sources.append(config)
             logger.info(f"已加载源: {config.get('name', yaml_file.name)}")
             
         except Exception as e:
             logger.error(f"加载 {yaml_file.name} 失败: {e}")
-            sys.exit(1)
     
     return sources
 
@@ -190,25 +186,13 @@ def main():
     all_items = fetch_all(sources)
     
     # 跨天去重（每个源可能有不同的 dedup_days）
-    # 先获取全局默认值
     global_dedup_days = config.get("dedup_days", 3)
-    
-    # 按源分组，分别去重
-    source_groups = {}
-    for item in all_items:
-        source = item.get("source", "其他")
-        if source not in source_groups:
-            source_groups[source] = []
-        source_groups[source].append(item)
+    source_groups = group_by_source(all_items)
     
     deduplicated_items = []
     for source, items in source_groups.items():
-        # 从源配置中读取 dedup_days
-        dedup_days = global_dedup_days
-        for src in sources:
-            if src.get("name") == source or src.get("name", "").lower() in source.lower():
-                dedup_days = src.get("dedup_days", global_dedup_days)
-                break
+        src_config = find_source_config(source, sources)
+        dedup_days = src_config.get("dedup_days", global_dedup_days) if src_config else global_dedup_days
         
         recent_urls = load_recent_urls(days=dedup_days)
         before_count = len(items)
@@ -236,22 +220,12 @@ def main():
     logger.info(f"去重后: {len(all_items)} 条")
     
     # 每源取前 N 条
-    source_groups = {}
-    for item in all_items:
-        source = item.get("source", "其他")
-        if source not in source_groups:
-            source_groups[source] = []
-        source_groups[source].append(item)
-    
+    source_groups = group_by_source(all_items)
     all_items = []
     for source, items in source_groups.items():
         items.sort(key=lambda x: x.get("score", 0) or 0, reverse=True)
-        limit = 10  # 默认 10 条
-        # 从源配置中读取 limit
-        for src in sources:
-            if src.get("name") == source or src.get("type") == source.lower():
-                limit = src.get("limit", 10)
-                break
+        src_config = find_source_config(source, sources)
+        limit = src_config.get("limit", 10) if src_config else 10
         all_items.extend(items[:limit])
     
     logger.info(f"最终 {len(all_items)} 条")

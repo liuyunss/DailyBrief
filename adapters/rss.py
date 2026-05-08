@@ -2,8 +2,8 @@
 
 import feedparser
 import requests
-import re
 from adapters.base import BaseAdapter
+from utils import clean_html
 
 
 class RSSAdapter(BaseAdapter):
@@ -43,7 +43,7 @@ class RSSAdapter(BaseAdapter):
             desc_field = fields.get("description", "summary")
             description = getattr(entry, desc_field, "")
             if description:
-                description = self._clean_html(str(description))
+                description = clean_html(str(description))
             
             # 获取分数（RSS 通常没有）
             score_field = fields.get("score", "")
@@ -63,11 +63,3 @@ class RSSAdapter(BaseAdapter):
             })
         
         return result
-    
-    def _clean_html(self, text):
-        """清理 HTML 标签"""
-        if not text:
-            return ""
-        clean = re.sub(r'<[^>]+>', '', text)
-        clean = re.sub(r'\s+', ' ', clean).strip()
-        return clean
