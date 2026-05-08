@@ -21,6 +21,7 @@ from adapters.arxiv import ArxivAdapter
 from filters.dedup import deduplicate
 from filters.keyword import filter_by_keywords
 from generator.markdown import generate_markdown
+from cache_manager import load_recent_urls, save_urls, filter_new_items
 
 # 日志配置
 logging.basicConfig(
@@ -103,6 +104,10 @@ def main():
     sources = load_sources()
     logger.info(f"加载了 {len(sources)} 个源")
     
+    # 加载近期缓存（跨天去重）
+    recent_urls = load_recent_urls(days=3)
+    logger.info(f"加载了 {len(recent_urls)} 条近期缓存")
+    
     # 收集所有内容
     all_items = []
     for source in sources:
@@ -123,18 +128,22 @@ def main():
     
     logger.info(f"共获取 {len(all_items)} 条内容")
     
+    # 跨天去重（排除近期已出现的 URL）
+    all_items = filter_new_items(all_items, recent_urls)
+    logger.info(f"跨天去重后: {len(all_items)} 条")
+    
     # 关键词过滤
     exclude_keywords = config.get("filter", {}).get("exclude_keywords", [])
     if exclude_keywords:
         all_items = filter_by_keywords(all_items, exclude_keywords)
         logger.info(f"关键词过滤后: {len(all_items)} 条")
     
-    # 去重
+    # 去重（同一天内）
     threshold = config.get("filter", {}).get("dedup_threshold", 0.7)
     all_items = deduplicate(all_items, threshold)
     logger.info(f"去重后: {len(all_items)} 条")
     
-    # 按源分组，每个源取固定数量（保证多样性）
+    # 每源取前 10 条，保证多样性
     source_groups = {}
     for item in all_items:
         source = item.get("source", "其他")
@@ -142,18 +151,10 @@ def main():
             source_groups[source] = []
         source_groups[source].append(item)
     
-    # 每个源取前 N 条
-    max_items = config.get("output", {}).get("max_items", 20)
-    per_source = max(2, max_items // len(source_groups)) if source_groups else max_items
-    
-    balanced_items = []
+    all_items = []
     for source, items in source_groups.items():
         items.sort(key=lambda x: x.get("score", 0), reverse=True)
-        balanced_items.extend(items[:per_source])
-    
-    # 最终排序
-    balanced_items.sort(key=lambda x: x.get("score", 0), reverse=True)
-    all_items = balanced_items[:max_items]
+        all_items.extend(items[:10])
     
     # 生成报告
     today = datetime.now().strftime("%Y-%m-%d")
@@ -164,6 +165,10 @@ def main():
     markdown = generate_markdown(all_items, today, config.get("output", {}))
     with open(output_file, "w", encoding="utf-8") as f:
         f.write(markdown)
+    
+    # 保存缓存
+    urls = [item.get("url", "") for item in all_items if item.get("url")]
+    save_urls(today, urls)
     
     logger.info(f"报告已生成: {output_file}")
     logger.info("=" * 50)

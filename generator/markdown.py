@@ -16,9 +16,6 @@ def generate_markdown(items, date, config):
     max_items = config.get("max_items", 20)
     categories = config.get("categories", [])
     
-    # 限制条目数量
-    items = items[:max_items]
-    
     # 按分类分组
     categorized = {cat["name"]: [] for cat in categories}
     categorized["其他"] = []
