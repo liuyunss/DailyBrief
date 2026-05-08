@@ -1,0 +1,72 @@
+# DailyBrief 数据源配置
+# 每个源独立一个条目，注释写清楚
+
+sources:
+  # ===== GitHub =====
+  - name: GitHub Trending
+    type: github
+    enabled: true
+    config:
+      language: all          # all/python/javascript/rust/...
+      since: daily           # daily/weekly/monthly
+      limit: 20              # 抓取数量
+
+  - name: GitHub New Repos
+    type: github_new
+    enabled: true
+    config:
+      language: all
+      stars_min: 50          # 至少 50 star 才纳入
+      since: daily
+
+  # ===== Hacker News =====
+  - name: Hacker News
+    type: hackernews
+    enabled: true
+    config:
+      min_score: 100         # 分数阈值
+      top_n: 20              # 取前 N 条
+
+  # ===== Reddit =====
+  - name: Reddit r/programming
+    type: reddit
+    enabled: true
+    config:
+      subreddit: programming
+      sort: hot
+      limit: 20
+      min_upvotes: 100
+
+  - name: Reddit r/MachineLearning
+    type: reddit
+    enabled: true
+    config:
+      subreddit: MachineLearning
+      sort: hot
+      limit: 20
+      min_upvotes: 50
+
+# ===== 全局过滤规则 =====
+filter:
+  # 去重：标题相似度 > 0.7 视为重复
+  dedup_threshold: 0.7
+  
+  # 排除关键词（不感兴趣的内容）
+  exclude_keywords:
+    - 招聘
+    - 求助
+    - 广告
+
+# ===== 输出配置 =====
+output:
+  format: markdown
+  max_items: 20
+  categories:
+    - name: 代码与项目
+      keywords: [github, repo, 开源, 代码]
+    - name: 技术文章
+      keywords: [blog, 文章, 教程, 深度]
+    - name: AI 与机器学习
+      keywords: [ai, ml, gpt, llm, 模型]
+    - name: 其他
+      keywords: []
