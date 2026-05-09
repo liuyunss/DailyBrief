@@ -3,7 +3,7 @@
 
 name: Reddit r/programming
 type: api
-enabled: true
+enabled: false
 
 url: "https://www.reddit.com/r/programming/hot.json"
 method: GET

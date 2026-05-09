@@ -3,7 +3,7 @@
 
 name: Reddit r/MachineLearning
 type: api
-enabled: true
+enabled: false
 
 url: "https://www.reddit.com/r/MachineLearning/hot.json"
 method: GET
