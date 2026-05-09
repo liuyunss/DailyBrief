@@ -2,7 +2,7 @@
 # 使用 Firebase API 获取热门文章
 
 name: Hacker News
-type: api
+type: hackernews
 enabled: true
 
 url: "https://hacker-news.firebaseio.com/v0/topstories.json"

@@ -1,6 +1,8 @@
 """通用 JSON API 适配器 - 配置驱动，无需写代码"""
 
+import re
 import requests
+from datetime import datetime, timedelta
 from adapters.base import BaseAdapter
 
 
@@ -21,6 +23,19 @@ class GenericAPIAdapter(BaseAdapter):
         method = config.get("method", "GET").upper()
         headers = config.get("headers", {})
         params = config.get("params", {})
+        
+        # 替换占位符：{today} -> YYYY-MM-DD, {yesterday} -> 昨天
+        today = datetime.now().strftime("%Y-%m-%d")
+        yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+        
+        def replace_placeholders(val):
+            if isinstance(val, str):
+                return val.replace("{today}", today).replace("{yesterday}", yesterday)
+            return val
+        
+        url = replace_placeholders(url)
+        params = {k: replace_placeholders(v) for k, v in params.items()}
+        headers = {k: replace_placeholders(v) for k, v in headers.items()}
         
         # 发送请求
         if method == "GET":

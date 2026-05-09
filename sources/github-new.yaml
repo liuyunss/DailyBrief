@@ -8,9 +8,9 @@ enabled: true
 url: "https://api.github.com/search/repositories"
 method: GET
 
-# 请求参数
+# 请求参数 - 使用 {today} 占位符会被自动替换
 params:
-  q: "stars:>50 created:>{today}"
+  q: "stars:>50 created:>{yesterday}"
   sort: "stars"
   order: "desc"
   per_page: 20

@@ -79,12 +79,12 @@ def generate_markdown(items, date_str, config):
             score_str = f" · {metric_label} {_format_number(score)}" if score and metric_label else ""
             lines.append(f"- [{title}]({url}) `{source}`{score_str}")
             
-            # 简介（如果有且非空）
+            # 简介用引用框展示
             if description:
                 desc = clean_html(description)
-                if len(desc) > 50:
-                    desc = desc[:50] + "..."
-                lines.append(f"  {desc}")
+                if len(desc) > 100:
+                    desc = desc[:100] + "..."
+                lines.append(f"> {desc}")
         
         lines.append("")
     

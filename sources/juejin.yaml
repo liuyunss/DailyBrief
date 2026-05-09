@@ -23,12 +23,12 @@ headers:
 # JSON 路径
 path: "data"
 
-# 字段映射
+# 字段映射 - 注意掘金数据结构是 item_info -> article_info
 fields:
-  title: "article_info.title"
-  url: "article_info.article_id"
-  description: "article_info.brief_content"
-  score: "counts.digg_count"
+  title: "item_info.article_info.title"
+  url: "item_info.article_info.article_id"
+  description: "item_info.article_info.brief_content"
+  score: "item_info.article_info.digg_count"
 
 # URL 构造：掘金需要拼接文章 ID
 url_prefix: "https://juejin.cn/post/"

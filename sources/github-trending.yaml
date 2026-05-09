@@ -10,14 +10,10 @@ method: GET
 
 # 请求参数
 params:
-  q: "stars:>100 pushed:>{today}"
+  q: "stars:>100 pushed:>{yesterday}"
   sort: "stars"
   order: "desc"
   per_page: 20
-
-# 需要设置 GitHub Token 以避免限流（可选）
-# headers:
-#   Authorization: "token ghp_xxxx"
 
 # JSON 路径
 path: "items"
