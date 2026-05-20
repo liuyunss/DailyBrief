@@ -3,7 +3,7 @@
 import os
 import yaml
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from adapters.api import GenericAPIAdapter
@@ -12,9 +12,9 @@ from adapters.bilibili import BilibiliAdapter
 from adapters.hackernews import HackerNewsAdapter
 from adapters.arxiv import ArxivAdapter
 from cache_manager import load_recent_urls, save_urls
-from filters.dedup import deduplicate
+from filters.dedup import deduplicate, deduplicate_by_url
 from generator.markdown import generate_markdown
-from utils import group_by_source, find_source_config
+from utils import group_by_source, find_source_config, clean_html
 
 # 日志配置
 logging.basicConfig(
@@ -105,69 +105,6 @@ def load_config(config_path="config.yaml"):
     return {}
 
 
-def update_readme(daily_dir="daily"):
-    """更新 README 报告索引"""
-    readme_path = Path("README.md")
-    
-    # 读取现有 README
-    existing_content = ""
-    if readme_path.exists():
-        existing_content = readme_path.read_text(encoding='utf-8')
-    
-    # 找到索引分隔标记
-    marker = "<!-- REPORT_INDEX_START -->"
-    end_marker = "<!-- REPORT_INDEX_END -->"
-    
-    # 扫描所有报告文件
-    daily_path = Path(daily_dir)
-    reports = []
-    
-    if daily_path.exists():
-        for md_file in sorted(daily_path.rglob("*.md"), reverse=True):
-            # 从路径提取日期
-            parts = md_file.parts
-            if len(parts) >= 4:  # daily/YYYY/MM/YYYY-MM-DD.md
-                date_str = md_file.stem  # YYYY-MM-DD
-                rel_path = str(md_file)
-                reports.append((date_str, rel_path))
-    
-    # 按月份分组
-    monthly = {}
-    for date_str, rel_path in reports:
-        month_key = date_str[:7]  # YYYY-MM
-        if month_key not in monthly:
-            monthly[month_key] = []
-        monthly[month_key].append((date_str, rel_path))
-    
-    # 生成索引内容
-    index_lines = [marker, "", "## 最近报告", ""]
-    
-    for month_key in sorted(monthly.keys(), reverse=True):
-        year, month = month_key.split("-")
-        index_lines.append(f"### {year}-{month}")
-        
-        for date_str, rel_path in sorted(monthly[month_key], reverse=True):
-            index_lines.append(f"- [{date_str}]({rel_path})")
-        
-        index_lines.append("")
-    
-    index_lines.append(end_marker)
-    index_content = "\n".join(index_lines)
-    
-    # 替换或追加索引
-    if marker in existing_content and end_marker in existing_content:
-        # 替换现有索引
-        start = existing_content.index(marker)
-        end = existing_content.index(end_marker) + len(end_marker)
-        new_content = existing_content[:start] + index_content + existing_content[end:]
-    else:
-        # 追加索引
-        new_content = existing_content.rstrip() + "\n\n" + index_content + "\n"
-    
-    readme_path.write_text(new_content, encoding='utf-8')
-    logger.info("README 已更新")
-
-
 def main():
     """主入口"""
     logger.info("=" * 50)
@@ -185,25 +122,7 @@ def main():
     # 获取数据
     all_items = fetch_all(sources)
     
-    # 跨天去重（每个源可能有不同的 dedup_days）
-    global_dedup_days = config.get("dedup_days", 3)
-    source_groups = group_by_source(all_items)
-    
-    deduplicated_items = []
-    for source, items in source_groups.items():
-        src_config = find_source_config(source, sources)
-        dedup_days = src_config.get("dedup_days", global_dedup_days) if src_config else global_dedup_days
-        
-        recent_urls = load_recent_urls(days=dedup_days)
-        before_count = len(items)
-        items = [item for item in items if item["url"] not in recent_urls]
-        logger.info(f"  {source}: 去重 {before_count} → {len(items)} (去重天数: {dedup_days})")
-        deduplicated_items.extend(items)
-    
-    all_items = deduplicated_items
-    logger.info(f"跨天去重后: {len(all_items)} 条")
-    
-    # 关键词过滤
+    # ========== 1. 关键词过滤 ==========
     exclude_keywords = config.get("filter", {}).get("exclude_keywords", [])
     if exclude_keywords:
         filtered = []
@@ -214,23 +133,44 @@ def main():
         all_items = filtered
         logger.info(f"关键词过滤后: {len(all_items)} 条")
     
-    # 标题去重
-    threshold = config.get("filter", {}).get("dedup_threshold", 0.7)
-    all_items = deduplicate(all_items, threshold)
-    logger.info(f"去重后: {len(all_items)} 条")
-    
-    # 每源取前 N 条
+    # ========== 2. 每源取前 N 条（按 score 排序）==========
     source_groups = group_by_source(all_items)
-    all_items = []
+    limited_items = []
     for source, items in source_groups.items():
         items.sort(key=lambda x: x.get("score", 0) or 0, reverse=True)
         src_config = find_source_config(source, sources)
         limit = src_config.get("limit", 10) if src_config else 10
-        all_items.extend(items[:limit])
+        limited_items.extend(items[:limit])
+    logger.info(f"每源取前 {limit} 条后: {len(limited_items)} 条")
     
-    logger.info(f"最终 {len(all_items)} 条")
+    # ========== 3. 跨天 URL 去重 ==========
+    global_dedup_days = config.get("dedup_days", 7)
+    deduplicated_items = []
+    for source, items in source_groups.items():
+        src_config = find_source_config(source, sources)
+        dedup_days = src_config.get("dedup_days", global_dedup_days) if src_config else global_dedup_days
+        
+        recent_urls = load_recent_urls(days=dedup_days)
+        before_count = len(items)
+        items = [item for item in items if item["url"] not in recent_urls]
+        logger.info(f"  {source}: 跨天去重 {before_count} → {len(items)} (天数: {dedup_days})")
+        deduplicated_items.extend(items)
     
-    # 生成报告
+    all_items = deduplicated_items
+    logger.info(f"跨天去重后: {len(all_items)} 条")
+    
+    # ========== 4. 同 URL 去重（保留 score 更高的）==========
+    if config.get("url_dedup", False):
+        before = len(all_items)
+        all_items = deduplicate_by_url(all_items)
+        logger.info(f"URL 去重: {before} → {len(all_items)}")
+    
+    # ========== 5. 标题相似度去重 ==========
+    threshold = config.get("filter", {}).get("dedup_threshold", 0.85)
+    all_items = deduplicate(all_items, threshold)
+    logger.info(f"标题去重后: {len(all_items)} 条")
+    
+    # ========== 6. 生成报告 ==========
     today = datetime.now().strftime("%Y-%m-%d")
     report = generate_markdown(all_items, today, config.get("output", {}))
     
@@ -246,9 +186,6 @@ def main():
     # 保存 URL 缓存
     urls = [item["url"] for item in all_items]
     save_urls(today, urls)
-    
-    # 更新 README
-    update_readme()
     
     logger.info("=" * 50)
 

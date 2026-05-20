@@ -144,12 +144,4 @@ class MyAdapter(BaseAdapter):
 
 MIT
 
-<!-- REPORT_INDEX_START -->
 
-## 最近报告
-
-### 2026-05
-- [2026-05-09](daily/2026/05/2026-05-09.md)
-- [2026-05-08](daily/2026/05/2026-05-08.md)
-
-<!-- REPORT_INDEX_END -->

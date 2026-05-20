@@ -3,13 +3,27 @@
 from difflib import SequenceMatcher
 
 
-def deduplicate(items, threshold=0.7):
+def deduplicate_by_url(items):
+    """按 URL 去重，保留 score 更高的"""
+    seen = {}
+    for item in items:
+        url = item.get("url", "")
+        if url in seen:
+            existing = seen[url]
+            if item.get("score", 0) > existing.get("score", 0):
+                seen[url] = item
+        else:
+            seen[url] = item
+    return list(seen.values())
+
+
+def deduplicate(items, threshold=0.85):
     """
-    去重：标题相似度 > threshold 视为重复
+    按标题相似度去重，保留 score 更高的
     
     Args:
         items: 条目列表
-        threshold: 相似度阈值
+        threshold: 相似度阈值（中文建议 0.85+）
         
     Returns:
         list: 去重后的列表

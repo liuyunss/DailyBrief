@@ -32,4 +32,7 @@ metric_label: "⭐"
 limit: 10
 
 # 去重天数
-dedup_days: 5
+dedup_days: 7
+
+# 同 URL 时保留更高 score（与 GitHub Trending 合并去重）
+url_dedup: true

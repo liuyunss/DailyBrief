@@ -7,7 +7,7 @@ dedup_days: 3
 # 过滤规则
 filter:
   # 去重：标题相似度 > 阈值视为重复
-  dedup_threshold: 0.7
+  dedup_threshold: 0.85
   
   # 排除关键词
   exclude_keywords:
