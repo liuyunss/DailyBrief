@@ -24,13 +24,14 @@ class GenericAPIAdapter(BaseAdapter):
         headers = config.get("headers", {})
         params = config.get("params", {})
         
-        # 替换占位符：{today} -> YYYY-MM-DD, {yesterday} -> 昨天
+        # 替换占位符：{today} -> YYYY-MM-DD, {yesterday} -> 昨天, {week_ago} -> 7天前
         today = datetime.now().strftime("%Y-%m-%d")
         yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+        week_ago = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
         
         def replace_placeholders(val):
             if isinstance(val, str):
-                return val.replace("{today}", today).replace("{yesterday}", yesterday)
+                return val.replace("{today}", today).replace("{yesterday}", yesterday).replace("{week_ago}", week_ago)
             return val
         
         url = replace_placeholders(url)

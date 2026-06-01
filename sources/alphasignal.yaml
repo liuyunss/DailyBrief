@@ -1,0 +1,16 @@
+# Alpha Signal 源
+# RSS 订阅：Alpha Signal 每周 AI/技术深度分析
+
+name: Alpha Signal
+type: rss
+enabled: true
+url: "https://www.alphasignal.ai/feed"
+fields:
+  title: "title"
+  url: "link"
+  description: "summary"
+metric_label: ""
+limit: 10
+dedup_days: 7
+frequency: weekly
+day: friday

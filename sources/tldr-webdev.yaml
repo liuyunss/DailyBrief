@@ -1,0 +1,15 @@
+# TLDR Web Dev 源
+# RSS 订阅：TLDR Web Dev 每日 Web 开发新闻
+
+name: TLDR Web Dev
+type: rss
+enabled: true
+url: "https://tldr.tech/webdev/rss"
+fields:
+  title: "title"
+  url: "link"
+  description: "summary"
+metric_label: ""
+limit: 10
+dedup_days: 7
+frequency: daily

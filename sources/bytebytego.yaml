@@ -1,0 +1,16 @@
+# ByteByteGo 源
+# RSS 订阅：ByteByteGo 每周系统架构设计文章
+
+name: ByteByteGo
+type: rss
+enabled: true
+url: "https://blog.bytebytego.com/feed"
+fields:
+  title: "title"
+  url: "link"
+  description: "summary"
+metric_label: ""
+limit: 10
+dedup_days: 7
+frequency: weekly
+day: friday

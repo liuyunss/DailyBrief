@@ -26,3 +26,7 @@ limit: 10
 
 # 去重天数
 dedup_days: 3
+
+# 采集频率
+frequency: weekly
+day: friday

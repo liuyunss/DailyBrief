@@ -1,45 +1,53 @@
-"""Hacker News 适配器 - 需要二次请求获取详情"""
+"""Hacker News 适配器 - 使用 Algolia API 获取每周精选"""
 
 import logging
 import requests
+from datetime import datetime, timedelta
 from adapters.base import BaseAdapter
 
 logger = logging.getLogger(__name__)
 
 
 class HackerNewsAdapter(BaseAdapter):
-    """Hacker News 热门适配器"""
-    
+    """Hacker News Algolia 适配器 - 按 points 排序获取每周精选"""
+
     def fetch(self, config):
         limit = config.get("limit", 10)
-        min_score = config.get("min_score", 100)
-        
-        # 获取热门故事 ID 列表
-        url = "https://hacker-news.firebaseio.com/v0/topstories.json"
-        
+
+        # 计算7天前的 Unix 时间戳
+        week_ago = datetime.now() - timedelta(days=7)
+        week_ago_unix = int(week_ago.timestamp())
+
+        url = "https://hn.algolia.com/api/v1/search"
+        params = {
+            "tags": "story",
+            "numericFilters": f"created_at_i>{week_ago_unix}",
+            "hitsPerPage": 30,
+            "query": "",
+        }
+
         try:
-            resp = requests.get(url, timeout=10)
+            resp = requests.get(url, params=params, timeout=30)
             resp.raise_for_status()
-            story_ids = resp.json()[:limit * 2]  # 多取一些，后面过滤
-            
+            data = resp.json()
+
+            # Algolia 默认按 relevance，我们手动按 points 降序排序
+            hits = data.get("hits", [])
+            hits.sort(key=lambda h: h.get("points", 0), reverse=True)
+
             items = []
-            for story_id in story_ids[:limit]:
-                story_url = f"https://hacker-news.firebaseio.com/v0/item/{story_id}.json"
-                story_resp = requests.get(story_url, timeout=5)
-                story = story_resp.json()
-                
-                if story and story.get("score", 0) >= min_score:
-                    items.append({
-                        "title": story.get("title", ""),
-                        "url": story.get("url", f"https://news.ycombinator.com/item?id={story_id}"),
-                        "source": "Hacker News",
-                        "score": story.get("score", 0),
-                        "description": "",
-                        "metric_label": "points",
-                    })
-            
+            for hit in hits[:limit]:
+                items.append({
+                    "title": hit.get("title", ""),
+                    "url": hit.get("url", f"https://news.ycombinator.com/item?id={hit.get('objectID', '')}"),
+                    "source": "Hacker News",
+                    "score": hit.get("points", 0),
+                    "description": hit.get("description", "") or hit.get("story_text", "") or "",
+                    "metric_label": "points",
+                })
+
             return items
-            
+
         except Exception as e:
-            logger.error(f"Hacker News 请求失败: {e}")
+            logger.error(f"Hacker News Algolia 请求失败: {e}")
             return []

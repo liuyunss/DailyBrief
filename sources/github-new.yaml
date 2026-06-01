@@ -10,7 +10,7 @@ method: GET
 
 # 请求参数 - 使用 {today} 占位符会被自动替换
 params:
-  q: "stars:>50 created:>{yesterday}"
+  q: "stars:>50 created:>{week_ago}"
   sort: "stars"
   order: "desc"
   per_page: 20
@@ -36,3 +36,7 @@ dedup_days: 7
 
 # 同 URL 时保留更高 score（与 GitHub Trending 合并去重）
 url_dedup: true
+
+# 采集频率
+frequency: weekly
+day: friday

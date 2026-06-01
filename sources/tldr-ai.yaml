@@ -1,0 +1,15 @@
+# TLDR AI 源
+# RSS 订阅：TLDR AI 每日 AI 新闻汇总
+
+name: TLDR AI
+type: rss
+enabled: true
+url: "https://tldr.tech/ai/rss"
+fields:
+  title: "title"
+  url: "link"
+  description: "summary"
+metric_label: ""
+limit: 10
+dedup_days: 7
+frequency: daily
