@@ -1,0 +1,27 @@
+# Product Hunt RSS 源
+# 每日新产品/工具
+
+name: Product Hunt
+type: rss
+enabled: true
+
+# RSS 地址
+url: "https://www.producthunt.com/feed"
+
+# 字段映射
+fields:
+  title: "title"
+  url: "link"
+  description: "summary"
+
+# 热度标签（Product Hunt 没有分数，不显示）
+metric_label: ""
+
+# 每源条数
+limit: 10
+
+# 去重天数
+dedup_days: 7
+
+# 每日采集
+frequency: daily

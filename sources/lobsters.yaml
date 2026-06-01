@@ -1,0 +1,27 @@
+# Lobsters RSS 源
+# 技术讨论社区，类似 HN 但更偏技术深度
+
+name: Lobsters
+type: rss
+enabled: true
+
+# RSS 地址
+url: "https://lobste.rs/rss"
+
+# 字段映射
+fields:
+  title: "title"
+  url: "link"
+  description: "summary"
+
+# 热度标签（Lobsters 没有分数，不显示）
+metric_label: ""
+
+# 每源条数
+limit: 10
+
+# 去重天数
+dedup_days: 7
+
+# 每日采集
+frequency: daily

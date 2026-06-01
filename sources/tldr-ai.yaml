@@ -3,7 +3,7 @@
 
 name: TLDR AI
 type: rss
-enabled: true
+enabled: false  # RSS 404，需要爬虫适配器
 url: "https://tldr.tech/ai/rss"
 fields:
   title: "title"

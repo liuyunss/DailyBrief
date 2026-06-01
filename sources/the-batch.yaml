@@ -3,7 +3,7 @@
 
 name: The Batch
 type: rss
-enabled: true
+enabled: false  # RSS 308重定向后404，需要爬虫适配器
 url: "https://www.deeplearning.ai/the-batch/feed/"
 fields:
   title: "title"

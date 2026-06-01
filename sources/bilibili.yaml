@@ -8,5 +8,9 @@ enabled: true
 # 每源条数
 limit: 10
 
+# 每周采集（周五执行）
+frequency: weekly
+day: friday
+
 # 去重天数（B站内容留存久）
 dedup_days: 7

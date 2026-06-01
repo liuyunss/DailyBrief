@@ -36,21 +36,14 @@ def generate_markdown(items, date_str, config):
                   "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十"]
     lunar_str = f"农历{lunar_months[lunar.month - 1]}{lunar_days[lunar.day - 1]}"
     
-    # 按分类分组
-    categories = config.get("categories", [])
-    categorized = {cat["name"]: [] for cat in categories}
-    categorized["其他"] = []
-    
+    # 按来源分组
+    from collections import OrderedDict
+    source_groups = OrderedDict()
     for item in items:
-        placed = False
-        for cat in categories:
-            if _matches_category(item, cat.get("keywords", [])):
-                categorized[cat["name"]].append(item)
-                placed = True
-                break
-        
-        if not placed:
-            categorized["其他"].append(item)
+        source = item["source"]
+        if source not in source_groups:
+            source_groups[source] = []
+        source_groups[source].append(item)
     
     # 生成 Markdown
     lines = [
@@ -60,24 +53,20 @@ def generate_markdown(items, date_str, config):
         "",
     ]
     
-    for cat_name, cat_items in categorized.items():
-        if not cat_items:
-            continue
-        
-        lines.append(f"## {cat_name}")
+    for source, source_items in source_groups.items():
+        lines.append(f"## {source}")
         lines.append("")
         
-        for item in cat_items:
+        for item in source_items:
             title = item["title"]
             url = item["url"]
-            source = item["source"]
             score = item.get("score")
             metric_label = item.get("metric_label", "")
             description = item.get("description", "")
             
             # 格式：标题（链接）
             score_str = f" · {metric_label} {_format_number(score)}" if score and metric_label else ""
-            lines.append(f"- [{title}]({url}) `{source}`{score_str}")
+            lines.append(f"- [{title}]({url}){score_str}")
             
             # 简介用引用框展示
             if description:
@@ -120,16 +109,3 @@ def _format_number(num):
         return str(num)
 
 
-def _matches_category(item, keywords):
-    """检查条目是否匹配分类"""
-    if not keywords:
-        return False
-    
-    title = (item.get("title", "") or "").lower()
-    description = (item.get("description", "") or "").lower()
-    
-    for keyword in keywords:
-        if keyword.lower() in title or keyword.lower() in description:
-            return True
-    
-    return False
