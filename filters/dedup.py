@@ -10,7 +10,7 @@ def deduplicate_by_url(items):
         url = item.get("url", "")
         if url in seen:
             existing = seen[url]
-            if item.get("score", 0) > existing.get("score", 0):
+            if (item.get("score") or 0) > (existing.get("score") or 0):
                 seen[url] = item
         else:
             seen[url] = item
@@ -46,7 +46,7 @@ def deduplicate(items, threshold=0.85):
             if similarity > threshold:
                 is_duplicate = True
                 # 保留分数更高的
-                if item.get("score", 0) > existing.get("score", 0):
+                if (item.get("score") or 0) > (existing.get("score") or 0):
                     unique.remove(existing)
                     unique.append(item)
                 break
