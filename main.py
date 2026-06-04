@@ -184,8 +184,8 @@ def main():
     report_path.write_text(report, encoding='utf-8')
     logger.info(f"报告已生成: {report_path}")
     
-    # 保存 URL 缓存
-    urls = [item["url"] for item in all_items]
+    # 保存 URL 缓存（使用跨天去重后的 URL，确保被标题去重移除的 URL 也被缓存）
+    urls = [item["url"] for item in deduplicated_items]
     save_urls(today, urls)
     
     logger.info("=" * 50)
