@@ -136,12 +136,13 @@ def main():
     # ========== 2. 每源取前 N 条（按 score 排序）==========
     source_groups = group_by_source(all_items)
     limited_items = []
+    default_limit = 10
     for source, items in source_groups.items():
         items.sort(key=lambda x: x.get("score", 0) or 0, reverse=True)
         src_config = find_source_config(source, sources)
-        limit = src_config.get("limit", 10) if src_config else 10
+        limit = src_config.get("limit", default_limit) if src_config else default_limit
         limited_items.extend(items[:limit])
-    logger.info(f"每源取前 {limit} 条后: {len(limited_items)} 条")
+    logger.info(f"每源取前 {default_limit} 条后: {len(limited_items)} 条")
     
     # ========== 3. 跨天 URL 去重 ==========
     global_dedup_days = config.get("dedup_days", 7)
