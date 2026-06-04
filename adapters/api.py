@@ -85,7 +85,7 @@ class GenericAPIAdapter(BaseAdapter):
             
             # 尝试转数字
             try:
-                score = int(score) if score else None
+                score = int(score) if score is not None else None
             except (ValueError, TypeError):
                 score = None
             
