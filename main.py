@@ -146,7 +146,7 @@ def main():
     # ========== 3. 跨天 URL 去重 ==========
     global_dedup_days = config.get("dedup_days", 7)
     deduplicated_items = []
-    for source, items in source_groups.items():
+    for source, items in group_by_source(limited_items).items():
         src_config = find_source_config(source, sources)
         dedup_days = src_config.get("dedup_days", global_dedup_days) if src_config else global_dedup_days
         
