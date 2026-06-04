@@ -16,7 +16,7 @@ class ArxivAdapter(BaseAdapter):
         limit = config.get("limit", 10)
         
         # ArXiv API（无需认证）
-        url = "http://export.arxiv.org/api/query"
+        url = "https://export.arxiv.org/api/query"
         params = {
             "search_query": f"cat:{category}",
             "sortBy": "submittedDate",
